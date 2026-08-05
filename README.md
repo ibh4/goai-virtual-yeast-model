@@ -14,6 +14,7 @@
 </p>
 
 ---
+<img width="1706" height="803" alt="image" src="https://github.com/user-attachments/assets/3d91c164-eec0-470d-aa8c-8108ed427243" />
 
 ## 0. 项目一句话
 
@@ -75,43 +76,26 @@ flowchart LR
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#EFF6FF", "clusterBorder": "#0EA5E9", "edgeLabelBackground": "#FFFFFF"}}}%%
-flowchart TB
-    subgraph FORMULA["预测公式"]
-        direction LR
-        FINAL["最终预测<br/>y_pred"]:::final
-        EQ["="]:::eq
-        CONTROL["对照基线<br/>z_control × D_control"]:::control
-        PLUS1["+"]:::eq
-        DRUG_EFF["共享药物效应<br/>drug_embed → μ_drug"]:::drug
-        PLUS2["+"]:::eq
-        STRAIN_MOD["菌株 FiLM 调制<br/>scale × μ + shift"]:::strain
-        PLUS3["+"]:::eq
-        INTERACT["药物-菌株交互<br/>low-rank bilinear"]:::interact
-        PLUS4["+"]:::eq
-        CTX_MOD["上下文调制<br/>context encoder"]:::context
-    end
+flowchart LR
+    CONTROL["对照基线<br/>Control Rank 192"]:::control
+    DRUG["共享药物效应<br/>Drug Embedding"]:::drug
+    STRAIN["菌株 FiLM 调制<br/>Rank 64"]:::strain
+    INTERACT["药物-菌株交互<br/>Bilinear Rank 64"]:::interact
+    CONTEXT["上下文调制<br/>Time / Temp / Batch"]:::context
+    DECODE["低秩蛋白解码<br/>Delta Rank 256 → 5,243"]:::decoder
+    FINAL["最终预测<br/>y_pred"]:::final
 
-    subgraph DECODE["低秩解码：无逐样本全图 GAT"]
-        ZC["z_control<br/>[B, 192]"]:::latent
-        DC["D_control<br/>[192, 5243]"]:::decoder
-        ZD["z_delta<br/>[B, 256]"]:::latent
-        DD["D_delta<br/>[256, 5243]"]:::decoder
-    end
+    CONTROL --> DECODE
+    DRUG --> STRAIN --> INTERACT --> CONTEXT --> DECODE
+    DECODE --> FINAL
 
-    CONTROL --> ZC
-    CONTROL --> DC
-    DRUG_EFF --> ZD
-    DRUG_EFF --> DD
-
-    classDef final fill:#22C55E,stroke:#DCFCE7,color:#052E16,stroke-width:3px;
     classDef control fill:#2563EB,stroke:#DBEAFE,color:#FFFFFF,stroke-width:2px;
     classDef drug fill:#F59E0B,stroke:#FEF3C7,color:#111827,stroke-width:2px;
     classDef strain fill:#A855F7,stroke:#F3E8FF,color:#FFFFFF,stroke-width:2px;
     classDef interact fill:#EC4899,stroke:#FCE7F3,color:#FFFFFF,stroke-width:2px;
     classDef context fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
-    classDef latent fill:#6366F1,stroke:#E0E7FF,color:#FFFFFF,stroke-width:2px;
     classDef decoder fill:#76B900,stroke:#D9F99D,color:#111827,stroke-width:3px;
-    classDef eq fill:#FACC15,stroke:#FEF08A,color:#422006,stroke-width:2px;
+    classDef final fill:#22C55E,stroke:#DCFCE7,color:#052E16,stroke-width:3px;
 ```
 
 
