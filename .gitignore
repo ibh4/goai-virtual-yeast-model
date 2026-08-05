@@ -1,0 +1,58 @@
+# Official GOAI data ¡ª NEVER commit
+input/
+data/raw/
+data/private/
+WAYB_WAYC_*.csv
+
+# Predictions and submissions
+prediction.csv
+prediction.csv.gz
+*submission*.csv
+*submission*.csv.gz
+submission_packages/
+*.zip
+*.7z
+*.rar
+
+# Models and preprocessing artifacts
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.parquet
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+credentials*
+secrets*
+token*
+api_key*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Experiment outputs
+wandb/
+runs/
+logs/
+cache/
+checkpoints/
+outputs/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

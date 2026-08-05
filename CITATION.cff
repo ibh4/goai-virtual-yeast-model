@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "GOAI Virtual Yeast Model"
+message: "If you use this software, please cite it using the metadata in this file."
+type: software
+authors:
+  - family-names: Peng
+    given-names: Weichao
+year: 2026
+repository-code: "https://github.com/<YOUR_GITHUB_USERNAME>/goai-virtual-yeast-model"
+abstract: "A leakage-safe, control-anchored low-rank model for predicting 5,243-dimensional yeast proteome responses under unseen compounds and strains."
+keywords:
+  - goai
+  - ai-for-science
+  - virtual-cell
+  - proteomics
+  - perturbation-prediction
+  - pytorch
+license: MIT
