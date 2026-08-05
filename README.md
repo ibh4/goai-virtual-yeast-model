@@ -14,7 +14,8 @@
 </p>
 
 ---
-<img width="1706" height="803" alt="image" src="https://github.com/user-attachments/assets/3d91c164-eec0-470d-aa8c-8108ed427243" />
+<img width="1695" height="801" alt="image" src="https://github.com/user-attachments/assets/d9d3ffb7-3bdf-4c76-95cb-2814bd0c0a20" />
+
 
 ## 0. 项目一句话
 
