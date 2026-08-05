@@ -1,4 +1,4 @@
-# GOAI Virtual Yeast Model
+# GOAI 虚拟细胞酵母蛋白模型
 
 <p align="center">
   <b>Control-Anchored Low-Rank Virtual Yeast Perturbation Predictor</b><br>
