@@ -62,9 +62,9 @@ flowchart LR
     CTRL --> PRED
     DELTA --> PRED
 
-    classDef input fill:#F97316,stroke:#FED7AA,color:#111827,stroke-width:2px;
-    classDef model fill:#2563EB,stroke:#BFDBFE,color:#FFFFFF,stroke-width:2px;
-    classDef output fill:#22C55E,stroke:#BBF7D0,color:#052E16,stroke-width:2px;
+    classDef input fill:#374151,stroke:#9CA3AF,color:#F9FAFB,stroke-width:2px;
+    classDef model fill:#4B5563,stroke:#9CA3AF,color:#F9FAFB,stroke-width:2px;
+    classDef output fill:#6B7280,stroke:#9CA3AF,color:#F9FAFB,stroke-width:2px;
 ```
 
 ## 2. 核心架构：对照锚定 + 低秩蛋白质组解码
@@ -87,7 +87,7 @@ flowchart TB
         CTX_MOD[上下文调制<br/>context encoder]:::context
     end
 
-    subgraph DECODE[低秩解码 (无逐样本全图GAT)]
+    subgraph DECODE[低秩解码 无逐样本全图GAT]
         ZC[z_control<br/>[B, 192]]:::latent
         DC[D_control<br/>[192, 5243]]:::decoder
         ZD[z_delta<br/>[B, 256]]:::latent
@@ -109,6 +109,7 @@ flowchart TB
     classDef decoder fill:#76B900,stroke:#D9F99D,color:#111827,stroke-width:3px;
     classDef eq fill:none,stroke:none,color:#94A3B8;
 ```
+
 
 模型核心创新在于**不逐样本运行完整 GAT**，而是对全蛋白矩阵进行低秩 PCA 分解：
 
@@ -297,7 +298,7 @@ goai-virtual-yeast-model/
 ### 7.1 安装
 
 ```bash
-git clone https://github.com/<YOUR_USERNAME>/goai-virtual-yeast-model.git
+git clone https://github.com/ibh4/goai-virtual-yeast-model.git
 cd goai-virtual-yeast-model
 pip install -r requirements.txt
 ```
@@ -362,7 +363,7 @@ pytest -q    # 11 passed
   author = {Peng, Weichao},
   title = {GOAI Virtual Yeast Model: Control-Anchored Low-Rank Virtual Yeast Perturbation Predictor},
   year = {2026},
-  url = {https://github.com/<YOUR_USERNAME>/goai-virtual-yeast-model},
+  url = {https://github.com/ibh4/goai-virtual-yeast-model},
 }
 ```
 
