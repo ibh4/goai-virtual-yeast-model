@@ -36,22 +36,22 @@
 因此本项目不只是做蛋白质组预测，更是建立一个**从审计、治理到消融验证的严格 AI4Science 实验体系**。
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#0B1020", "primaryColor": "#172554", "primaryTextColor": "#F8FAFC", "primaryBorderColor": "#38BDF8", "lineColor": "#94A3B8", "tertiaryColor": "#111827"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#EFF6FF", "clusterBorder": "#0EA5E9", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart LR
-    subgraph I[输入条件]
-        STRAIN[菌株<br/>BAH/CEK/CGD/DHY210<br/>+ 未见菌株 CRD/BAI]:::input
-        DRUG[化合物扰动<br/>46种药物<br/>+ 未见化合物]:::input
-        CTX[测量上下文<br/>时间/温度/培养基<br/>仪器/板/孔]:::input
+    subgraph I["输入条件"]
+        STRAIN["菌株<br/>BAH / CEK / CGD / DHY210<br/>+ 未见菌株 CRD / BAI"]:::strainInput
+        DRUG["化合物扰动<br/>46 种药物<br/>+ 未见化合物"]:::drugInput
+        CTX["测量上下文<br/>时间 / 温度 / 培养基<br/>仪器 / 板 / 孔"]:::contextInput
     end
 
-    subgraph M[ControlAnchoredLowRankModelV5]
-        ENC[条件编码器<br/>Chemical Encoder<br/>Strain Encoder<br/>Context Encoder]:::model
-        CTRL[对照预测头<br/>Control Head<br/>秩=192]:::model
-        DELTA[扰动Delta头<br/>Delta Head<br/>秩=256]:::model
+    subgraph M["ControlAnchoredLowRankModelV5"]
+        ENC["条件编码器<br/>Chemical Encoder<br/>Strain Encoder<br/>Context Encoder"]:::encoder
+        CTRL["对照预测头<br/>Control Head<br/>秩 = 192"]:::controlHead
+        DELTA["扰动 Delta 头<br/>Delta Head<br/>秩 = 256"]:::deltaHead
     end
 
-    subgraph O[输出]
-        PRED[5,243维蛋白质组<br/>log2 丰度预测]:::output
+    subgraph O["输出"]
+        PRED["5,243 维蛋白质组<br/>log2 丰度预测"]:::output
     end
 
     STRAIN --> ENC
@@ -62,36 +62,40 @@ flowchart LR
     CTRL --> PRED
     DELTA --> PRED
 
-    classDef input fill:#374151,stroke:#9CA3AF,color:#F9FAFB,stroke-width:2px;
-    classDef model fill:#4B5563,stroke:#9CA3AF,color:#F9FAFB,stroke-width:2px;
-    classDef output fill:#6B7280,stroke:#9CA3AF,color:#F9FAFB,stroke-width:2px;
+    classDef strainInput fill:#F97316,stroke:#FFEDD5,color:#111827,stroke-width:2px;
+    classDef drugInput fill:#EC4899,stroke:#FCE7F3,color:#FFFFFF,stroke-width:2px;
+    classDef contextInput fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
+    classDef encoder fill:#7C3AED,stroke:#DDD6FE,color:#FFFFFF,stroke-width:2px;
+    classDef controlHead fill:#2563EB,stroke:#BFDBFE,color:#FFFFFF,stroke-width:2px;
+    classDef deltaHead fill:#A855F7,stroke:#F3E8FF,color:#FFFFFF,stroke-width:2px;
+    classDef output fill:#76B900,stroke:#D9F99D,color:#111827,stroke-width:3px;
 ```
 
 ## 2. 核心架构：对照锚定 + 低秩蛋白质组解码
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#0F172A", "primaryTextColor": "#F8FAFC", "lineColor": "#94A3B8"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#EFF6FF", "clusterBorder": "#0EA5E9", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart TB
-    subgraph FORMULA[预测公式]
+    subgraph FORMULA["预测公式"]
         direction LR
-        FINAL[最终预测<br/>y_pred]:::final
-        EQ[=]:::eq
-        CONTROL[对照基线<br/>z_control × D_control]:::control
-        PLUS1[+]:::eq
-        DRUG_EFF[共享药物效应<br/>drug_embed → μ_drug]:::drug
-        PLUS2[+]:::eq
-        STRAIN_MOD[菌株FiLM调制<br/>scale × μ + shift]:::strain
-        PLUS3[+]:::eq
-        INTERACT[药物-菌株交互<br/>low-rank bilinear]:::interact
-        PLUS4[+]:::eq
-        CTX_MOD[上下文调制<br/>context encoder]:::context
+        FINAL["最终预测<br/>y_pred"]:::final
+        EQ["="]:::eq
+        CONTROL["对照基线<br/>z_control × D_control"]:::control
+        PLUS1["+"]:::eq
+        DRUG_EFF["共享药物效应<br/>drug_embed → μ_drug"]:::drug
+        PLUS2["+"]:::eq
+        STRAIN_MOD["菌株 FiLM 调制<br/>scale × μ + shift"]:::strain
+        PLUS3["+"]:::eq
+        INTERACT["药物-菌株交互<br/>low-rank bilinear"]:::interact
+        PLUS4["+"]:::eq
+        CTX_MOD["上下文调制<br/>context encoder"]:::context
     end
 
-    subgraph DECODE[低秩解码 无逐样本全图GAT]
-        ZC[z_control<br/>[B, 192]]:::latent
-        DC[D_control<br/>[192, 5243]]:::decoder
-        ZD[z_delta<br/>[B, 256]]:::latent
-        DD[D_delta<br/>[256, 5243]]:::decoder
+    subgraph DECODE["低秩解码：无逐样本全图 GAT"]
+        ZC["z_control<br/>[B, 192]"]:::latent
+        DC["D_control<br/>[192, 5243]"]:::decoder
+        ZD["z_delta<br/>[B, 256]"]:::latent
+        DD["D_delta<br/>[256, 5243]"]:::decoder
     end
 
     CONTROL --> ZC
@@ -100,18 +104,18 @@ flowchart TB
     DRUG_EFF --> DD
 
     classDef final fill:#22C55E,stroke:#DCFCE7,color:#052E16,stroke-width:3px;
-    classDef control fill:#3B82F6,stroke:#DBEAFE,color:#FFFFFF,stroke-width:2px;
+    classDef control fill:#2563EB,stroke:#DBEAFE,color:#FFFFFF,stroke-width:2px;
     classDef drug fill:#F59E0B,stroke:#FEF3C7,color:#111827,stroke-width:2px;
     classDef strain fill:#A855F7,stroke:#F3E8FF,color:#FFFFFF,stroke-width:2px;
     classDef interact fill:#EC4899,stroke:#FCE7F3,color:#FFFFFF,stroke-width:2px;
     classDef context fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
     classDef latent fill:#6366F1,stroke:#E0E7FF,color:#FFFFFF,stroke-width:2px;
     classDef decoder fill:#76B900,stroke:#D9F99D,color:#111827,stroke-width:3px;
-    classDef eq fill:none,stroke:none,color:#94A3B8;
+    classDef eq fill:#FACC15,stroke:#FEF08A,color:#422006,stroke-width:2px;
 ```
 
 
-模型核心创新在于**不逐样本运行完整 GAT**，而是对全蛋白矩阵进行低秩 PCA 分解：
+模型核心创新在于**不对每个样本运行完整的蛋白图 GAT**，而是先对全蛋白矩阵进行低秩 PCA 分解，再在低维潜空间中预测对照基线与扰动增量：
 
 | 组件 | 维度 | 说明 |
 |------|------|------|
@@ -125,17 +129,26 @@ flowchart TB
 ## 3. 数据治理：防泄漏体系
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#020617", "primaryTextColor": "#F8FAFC", "lineColor": "#CBD5E1"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#EFF6FF", "clusterBorder": "#0EA5E9", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart LR
-    Q1[Q1 测试标签隔离<br/>TEST LABEL QUARANTINE]:::fix --> Q2[Q2 化合物冲突<br/>16个collision修复]:::fix
-    Q2 --> Q3[Q3 缺失值治理<br/>observed_mask loss]:::fix
-    Q3 --> Q4[Q4 PCA/Imputer<br/>每fold独立拟合]:::fix
-    Q4 --> Q5[Q5 菌株隔离<br/>BAI未进训练]:::fix
-    Q5 --> Q6[Q6 上下文防记忆<br/>embedding+dropout]:::fix
-    Q6 --> Q7[Q7 无全图GAT<br/>低秩解码替代]:::fix
-    Q7 --> SAFE[数据安全体系<br/>通过全部10项审计]:::safe
+    Q1["Q1 测试标签隔离<br/>TEST LABEL QUARANTINE"]:::q1
+    Q2["Q2 化合物冲突<br/>修复 16 个 collision"]:::q2
+    Q3["Q3 缺失值治理<br/>observed_mask loss"]:::q3
+    Q4["Q4 PCA / Imputer<br/>每个 fold 独立拟合"]:::q4
+    Q5["Q5 菌株隔离<br/>BAI 未进入训练"]:::q5
+    Q6["Q6 上下文防记忆<br/>embedding + dropout"]:::q6
+    Q7["Q7 无全图 GAT<br/>低秩解码替代"]:::q7
+    SAFE["数据安全体系<br/>通过全部 10 项审计"]:::safe
 
-    classDef fix fill:#06B6D4,stroke:#A5F3FC,color:#042F2E,stroke-width:2px;
+    Q1 --> Q2 --> Q3 --> Q4 --> Q5 --> Q6 --> Q7 --> SAFE
+
+    classDef q1 fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:2px;
+    classDef q2 fill:#F97316,stroke:#FFEDD5,color:#111827,stroke-width:2px;
+    classDef q3 fill:#FACC15,stroke:#FEF08A,color:#422006,stroke-width:2px;
+    classDef q4 fill:#06B6D4,stroke:#CFFAFE,color:#083344,stroke-width:2px;
+    classDef q5 fill:#2563EB,stroke:#DBEAFE,color:#FFFFFF,stroke-width:2px;
+    classDef q6 fill:#7C3AED,stroke:#DDD6FE,color:#FFFFFF,stroke-width:2px;
+    classDef q7 fill:#EC4899,stroke:#FCE7F3,color:#FFFFFF,stroke-width:2px;
     classDef safe fill:#22C55E,stroke:#BBF7D0,color:#052E16,stroke-width:3px;
 ```
 
@@ -152,31 +165,34 @@ flowchart LR
 ## 4. 验证体系：4 折 LOSO + Official Validation
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#111827", "primaryTextColor": "#F9FAFB", "lineColor": "#9CA3AF"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, sans-serif", "background": "#FFFFFF", "primaryColor": "#2563EB", "primaryTextColor": "#0F172A", "primaryBorderColor": "#67E8F9", "secondaryColor": "#7C3AED", "tertiaryColor": "#E0F2FE", "lineColor": "#0284C7", "clusterBkg": "#EFF6FF", "clusterBorder": "#0EA5E9", "edgeLabelBackground": "#FFFFFF"}}}%%
 flowchart LR
-    subgraph CV[4折 LOSO 交叉验证]
-        F0[Fold 0<br/>留出 BAH]:::fold
-        F1[Fold 1<br/>留出 CEK]:::fold
-        F2[Fold 2<br/>留出 CGD]:::fold
-        F3[Fold 3<br/>留出 DHY210]:::fold
+    subgraph CV["4 折 LOSO 交叉验证"]
+        F0["Fold 0<br/>留出 BAH"]:::fold0
+        F1["Fold 1<br/>留出 CEK"]:::fold1
+        F2["Fold 2<br/>留出 CGD"]:::fold2
+        F3["Fold 3<br/>留出 DHY210"]:::fold3
     end
 
-    subgraph VAL[Official Validation 锁定]
-        S1[val_chem_only<br/>S1: 新化合物]:::s1
-        S2[val_strain_only<br/>S2: 新菌株 BAI]:::s2
-        S3[val_both<br/>S3: 双重未知]:::s3
-        T[val_time<br/>时间外推]:::t
+    subgraph VAL["Official Validation 锁定"]
+        S1["val_chem_only<br/>S1：新化合物"]:::s1
+        S2["val_strain_only<br/>S2：新菌株 BAI"]:::s2
+        S3["val_both<br/>S3：双重未知"]:::s3
+        T["val_time<br/>时间外推"]:::time
     end
 
-    CV --> |消融选模| VAL
-    VAL --> |冻结A0| FINAL[Final Refit<br/>3 seeds 等权集成]:::final
+    CV -->|消融选模| VAL
+    VAL -->|冻结 A0| FINAL["Final Refit<br/>3 seeds 等权集成"]:::final
 
-    classDef fold fill:#6366F1,stroke:#E0E7FF,color:#FFFFFF,stroke-width:2px;
+    classDef fold0 fill:#06B6D4,stroke:#CFFAFE,color:#083344,stroke-width:2px;
+    classDef fold1 fill:#2563EB,stroke:#DBEAFE,color:#FFFFFF,stroke-width:2px;
+    classDef fold2 fill:#7C3AED,stroke:#DDD6FE,color:#FFFFFF,stroke-width:2px;
+    classDef fold3 fill:#A855F7,stroke:#F3E8FF,color:#FFFFFF,stroke-width:2px;
     classDef s1 fill:#F59E0B,stroke:#FEF3C7,color:#111827,stroke-width:2px;
     classDef s2 fill:#EF4444,stroke:#FECACA,color:#FFFFFF,stroke-width:2px;
     classDef s3 fill:#EC4899,stroke:#FCE7F3,color:#FFFFFF,stroke-width:2px;
-    classDef t fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
-    classDef final fill:#22C55E,stroke:#DCFCE7,color:#052E16,stroke-width:3px;
+    classDef time fill:#14B8A6,stroke:#CCFBF1,color:#042F2E,stroke-width:2px;
+    classDef final fill:#76B900,stroke:#D9F99D,color:#111827,stroke-width:3px;
 ```
 
 ### 消融实验结果 (4-fold LOSO, 40 epochs)
